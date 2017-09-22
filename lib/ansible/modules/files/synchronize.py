@@ -356,6 +356,7 @@ def main():
             private_key = dict(default=None),
             rsync_path = dict(default=None),
             _local_rsync_path = dict(default='rsync', type='path'),
+            _local_rsync_password = dict(default=None, no_log=True),
             _substitute_controller = dict(default='no', type='bool'),
             archive = dict(default='yes', type='bool'),
             checksum = dict(default='no', type='bool'),
@@ -394,6 +395,7 @@ def main():
     private_key = module.params['private_key']
     rsync_path = module.params['rsync_path']
     rsync = module.params.get('_local_rsync_path', 'rsync')
+    rsync_password = module.params.get('_local_rsync_password')
     rsync_timeout = module.params.get('rsync_timeout', 'rsync_timeout')
     archive = module.params['archive']
     checksum = module.params['checksum']
@@ -417,6 +419,8 @@ def main():
         rsync = module.get_bin_path(rsync, required=True)
 
     cmd = [rsync, '--delay-updates', '-F']
+    if rsync_password:
+        cmd = ['sshpass', '-p', rsync_password] + cmd
     if compress:
         cmd.append('--compress')
     if rsync_timeout:
